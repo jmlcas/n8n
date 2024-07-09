@@ -1,0 +1,46 @@
+services:
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped    
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - TZ=Europe/Madrid
+      - N8N_QUEUE_TYPE=redis
+      - N8N_QUEUE_HOST=redis
+      - N8N_QUEUE_PORT=6379
+      - N8N_QUEUE_NAME=n8n
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=password  
+#      - N8N_SECURE_COOKIE=false
+    volumes:
+      - n8n_data:/home/node/.n8n 
+      - ./local_files:/files         
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mariadb:latest
+    container_name: n8n-db
+    restart: unless-stopped    
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=n8n
+      - MYSQL_USER=n8n
+      - MYSQL_PASSWORD=password
+    volumes:
+      - ./db_data:/var/lib/mysql      
+
+  redis:
+    image: redis:latest
+    container_name: n8n-redis
+    restart: unless-stopped
+    volumes:
+      - ./redis_storage:/data
+
+volumes:
+  n8n_data:
